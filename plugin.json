@@ -1,0 +1,11 @@
+{
+  "id": "ai-panel-assistant",
+  "name": "AI Assistant Panel",
+  "version": "1.0.0",
+  "author": "Irwan x ChatGPT",
+  "type": "app",
+  "main": "main.js",
+  "icon": "🧠",
+  "permissions": ["dialog", "editor"],
+  "description": "Panel AI interaktif untuk bantu coding dengan GPT-3.5 via Pawan.krd. Mendukung multi-turn, tampilkan file aktif, dan bisa tulis ke file."
+}

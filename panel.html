@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Assistant</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+    }
+    #chat {
+      border: 1px solid #ccc;
+      height: 250px;
+      overflow-y: auto;
+      padding: 0.5em;
+      margin-bottom: 1em;
+      white-space: pre-wrap;
+    }
+    .user { color: #2c7; margin-top: 0.5em; }
+    .ai { color: #08f; margin-bottom: 0.5em; }
+    textarea {
+      width: 100%;
+      height: 60px;
+    }
+    input, button {
+      margin-top: 0.5em;
+    }
+    #file-info {
+      font-size: 0.85em;
+      margin-bottom: 1em;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div id="file-info">
+    📄 File: <span id="filename">-</span><br />
+    📁 Jalur: <span id="filepath">-</span>
+  </div>
+
+  <div id="chat"></div>
+
+  <textarea id="prompt" placeholder="Tulis pertanyaan kamu di sini..."></textarea><br />
+  <button onclick="sendPrompt()">Kirim ke AI</button>
+  <button onclick="resetChat()">Reset Obrolan</button>
+  <button onclick="applyToEditor()">Terapkan ke File</button><br />
+  <button onclick="copyLastReply()">📋 Salin Balasan Terakhir</button><br />
+
+  <hr />
+  <label>🔑 API Key:</label>
+  <input id="apikey" type="password" placeholder="sk-pawan-..." /><br />
+  <button onclick="saveKey()">Simpan API Key</button>
+
+  <script>
+    let messages = [];
+    let lastReply = '';
+    let filename = '', filepath = '', fileContent = '';
+
+    function saveKey() {
+      const key = document.getElementById("apikey").value;
+      localStorage.setItem("ai_api_key", key);
+      alert("API Key disimpan!");
+    }
+
+    async function sendPrompt() {
+      const prompt = document.getElementById("prompt").value.trim();
+      const key = localStorage.getItem("ai_api_key");
+      if (!prompt || !key) return alert("Isi prompt dan pastikan API key sudah di-set");
+
+      messages.push({ role: "user", content: prompt });
+
+      const response = await fetch("https://api.pawan.krd/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + key
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: messages,
+        })
+      });
+
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || "(tidak ada jawaban)";
+      messages.push({ role: "assistant", content: reply });
+      lastReply = reply;
+      updateChat();
+    }
+
+    function updateChat() {
+      const chatBox = document.getElementById("chat");
+      chatBox.innerHTML = "";
+      messages.forEach(m => {
+        const div = document.createElement("div");
+        div.className = m.role === "user" ? "user" : "ai";
+        div.textContent = `${m.role === "user" ? "🧍 Kamu" : "🤖 AI"}: ${m.content}`;
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function resetChat() {
+      messages = [];
+      updateChat();
+    }
+
+    function applyToEditor() {
+      if (!lastReply) return alert("Tidak ada balasan untuk diterapkan.");
+      parent.postMessage({
+        type: "applyToFile",
+        content: lastReply
+      }, "*");
+    }
+
+    function copyLastReply() {
+      if (!lastReply) return alert("Belum ada balasan dari AI.");
+      navigator.clipboard.writeText(lastReply).then(() => {
+        alert("Balasan disalin ke clipboard.");
+      }).catch(() => {
+        alert("Gagal menyalin. Browser tidak mendukung.");
+      });
+    }
+
+    window.addEventListener("message", (e) => {
+      if (e.data.type === "fileInfo") {
+        filename = e.data.filename;
+        filepath = e.data.filepath;
+        fileContent = e.data.content;
+        document.getElementById("filename").textContent = filename;
+        document.getElementById("filepath").textContent = filepath;
+      }
+    });
+
+    document.getElementById("apikey").value = localStorage.getItem("ai_api_key") || "";
+  </script>
+</body>
+</html>
