@@ -1,0 +1,30 @@
+// File: settings.gradle
+// Ini adalah settings.gradle yang diperbarui dengan sintaks '...' dan konfigurasi repositori.
+
+pluginManagement {
+    // Mendefinisikan repositori untuk plugin Gradle itu sendiri
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    // Mengatur mode resolusi repositori. Baris ini dikomentari untuk fleksibilitas.
+    // repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    
+    // Mendefinisikan repositori untuk dependensi proyek
+    repositories {
+        google() // Repositori Google untuk library Android dan ML Kit
+        mavenCentral() // Repositori Maven pusat
+        maven {
+            url 'https://itsaky.github.io/maven/' // Repositori kustom untuk library AndroidIDE
+        }
+    }
+}
+
+// Menentukan nama root proyek
+rootProject.name = 'BubbleTranslator'
+// Menyertakan modul 'app' dalam build proyek
+include ':app'

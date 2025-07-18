@@ -1,0 +1,13 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    // Naikkan versi plugin Android Gradle ke 8.5.0
+    id("com.android.application") version("8.5.0") apply(false) // <-- NAIKKAN KE 8.5.0
+    id("com.android.library") version("8.5.0") apply(false)     // <-- NAIKKAN KE 8.5.0
+    // Jika Anda menambahkan plugin lain di masa depan (misalnya Kotlin), mereka akan dideklarasikan di sini.
+    // id("org.jetbrains.kotlin.android") version("1.9.0") apply(false)
+}
+
+// Custom clean task (menggunakan sintaks Groovy DSL yang BENAR dengan (""))
+task clean(type: Delete) {
+    delete(rootProject.buildDir)
+}
